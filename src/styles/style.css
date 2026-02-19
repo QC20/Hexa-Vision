@@ -1,0 +1,80 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  overflow: hidden;
+  background: radial-gradient(#000, #111);
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+canvas {
+  display: block;
+}
+
+/* ── UI Label ─────────────────────────────────────────────── */
+
+.note {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  color: #ddd;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 13px;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 8px 10px;
+  border-radius: 6px;
+  backdrop-filter: blur(4px);
+  z-index: 10;
+}
+
+/* ── Notification Banner ──────────────────────────────────── */
+
+#notification {
+  position: fixed;
+  bottom: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 13px;
+  padding: 12px 18px;
+  border-radius: 8px;
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 999;
+}
+
+#notification a {
+  color: orange;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+#notification a:hover {
+  color: #ffb347;
+}
+
+#notification button {
+  background: none;
+  border: none;
+  color: gray;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+#notification button:hover {
+  color: #fff;
+}
