@@ -1,11 +1,11 @@
-import * as THREE from 'https://esm.sh/three@0.136.0';
-import { EffectComposer } from 'https://esm.sh/three@0.136.0/examples/jsm/postprocessing/EffectComposer.js';
-import { RenderPass } from 'https://esm.sh/three@0.136.0/examples/jsm/postprocessing/RenderPass.js';
-import { UnrealBloomPass } from 'https://esm.sh/three@0.136.0/examples/jsm/postprocessing/UnrealBloomPass.js';
-import { ShaderPass } from 'https://esm.sh/three@0.136.0/examples/jsm/postprocessing/ShaderPass.js';
-import { OrbitControls } from 'https://esm.sh/three@0.136.0/examples/jsm/controls/OrbitControls.js';
-import { TrackballControls } from 'https://esm.sh/three@0.136.0/examples/jsm/controls/TrackballControls.js';
-import anime from 'https://esm.sh/animejs@3.2.1';
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.136.0/build/three.es.js';
+import { EffectComposer } from 'https://cdn.jsdelivr.net/npm/three@0.136.0/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'https://cdn.jsdelivr.net/npm/three@0.136.0/examples/jsm/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'https://cdn.jsdelivr.net/npm/three@0.136.0/examples/jsm/postprocessing/UnrealBloomPass.js';
+import { ShaderPass } from 'https://cdn.jsdelivr.net/npm/three@0.136.0/examples/jsm/postprocessing/ShaderPass.js';
+import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.136.0/examples/jsm/controls/OrbitControls.js';
+import { TrackballControls } from 'https://cdn.jsdelivr.net/npm/three@0.136.0/examples/jsm/controls/TrackballControls.js';
+import anime from 'https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.es.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Text Scramble Utility
