@@ -1,3 +1,10 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// Hexa Vision
+// A real-time WebGL visualization simulating compound eye vision
+// through animated Voronoi patterns and hexagonal post-processing
+// March 2026
+// ─────────────────────────────────────────────────────────────────────────────
+
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.136.0/build/three.es.js';
 import { EffectComposer } from 'https://cdn.jsdelivr.net/npm/three@0.136.0/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'https://cdn.jsdelivr.net/npm/three@0.136.0/examples/jsm/postprocessing/RenderPass.js';
