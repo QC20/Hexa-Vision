@@ -5,14 +5,14 @@
 // March 2026
 // ─────────────────────────────────────────────────────────────────────────────
 
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.136.0/build/three.es.js';
-import { EffectComposer } from 'https://cdn.jsdelivr.net/npm/three@0.136.0/examples/jsm/postprocessing/EffectComposer.js';
-import { RenderPass } from 'https://cdn.jsdelivr.net/npm/three@0.136.0/examples/jsm/postprocessing/RenderPass.js';
-import { UnrealBloomPass } from 'https://cdn.jsdelivr.net/npm/three@0.136.0/examples/jsm/postprocessing/UnrealBloomPass.js';
-import { ShaderPass } from 'https://cdn.jsdelivr.net/npm/three@0.136.0/examples/jsm/postprocessing/ShaderPass.js';
-import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.136.0/examples/jsm/controls/OrbitControls.js';
-import { TrackballControls } from 'https://cdn.jsdelivr.net/npm/three@0.136.0/examples/jsm/controls/TrackballControls.js';
-import anime from 'https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.es.js';
+import * as THREE from 'https://unpkg.com/three@0.136.0/build/three.esm.js';
+import { EffectComposer } from 'https://unpkg.com/three@0.136.0/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'https://unpkg.com/three@0.136.0/examples/jsm/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'https://unpkg.com/three@0.136.0/examples/jsm/postprocessing/UnrealBloomPass.js';
+import { ShaderPass } from 'https://unpkg.com/three@0.136.0/examples/jsm/postprocessing/ShaderPass.js';
+import { OrbitControls } from 'https://unpkg.com/three@0.136.0/examples/jsm/controls/OrbitControls.js';
+import { TrackballControls } from 'https://unpkg.com/three@0.136.0/examples/jsm/controls/TrackballControls.js';
+import anime from 'https://unpkg.com/animejs@3.2.1/lib/anime.esm.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Text Scramble Utility
