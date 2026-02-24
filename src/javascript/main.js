@@ -5,13 +5,13 @@
 // March 2026
 // ─────────────────────────────────────────────────────────────────────────────
 
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@r128/build/three.module.js';
-import { EffectComposer } from 'https://cdn.jsdelivr.net/npm/three@r128/examples/jsm/postprocessing/EffectComposer.js';
-import { RenderPass } from 'https://cdn.jsdelivr.net/npm/three@r128/examples/jsm/postprocessing/RenderPass.js';
-import { UnrealBloomPass } from 'https://cdn.jsdelivr.net/npm/three@r128/examples/jsm/postprocessing/UnrealBloomPass.js';
-import { ShaderPass } from 'https://cdn.jsdelivr.net/npm/three@r128/examples/jsm/postprocessing/ShaderPass.js';
-import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@r128/examples/jsm/controls/OrbitControls.js';
-import { TrackballControls } from 'https://cdn.jsdelivr.net/npm/three@r128/examples/jsm/controls/TrackballControls.js';
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.module.js';
+import { EffectComposer }  from 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass }      from 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/jsm/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/jsm/postprocessing/UnrealBloomPass.js';
+import { ShaderPass }      from 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/jsm/postprocessing/ShaderPass.js';
+import { OrbitControls }   from 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/jsm/controls/OrbitControls.js';
+import { TrackballControls } from 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/jsm/controls/TrackballControls.js';
 import anime from 'https://cdn.jsdelivr.net/npm/animejs@3/lib/anime.esm.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -255,8 +255,8 @@ const flyShader = {
 // Scene Setup
 // ─────────────────────────────────────────────────────────────────────────────
 
-const scene    = new THREE.Scene();
-const camera   = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
+const scene  = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
 camera.position.z = 6;
 
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -269,20 +269,20 @@ document.body.appendChild(renderer.domElement);
 // ─────────────────────────────────────────────────────────────────────────────
 
 const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping  = true;
-controls.dampingFactor  = 0.02;
-controls.maxDistance    = 20;
-controls.minDistance    = 0.1;
-controls.panSpeed       = 0.02;
-controls.rotateSpeed    = 0.5;
-controls.zoomSpeed      = 1;
-controls.enableZoom     = false;
+controls.enableDamping = true;
+controls.dampingFactor = 0.02;
+controls.maxDistance   = 20;
+controls.minDistance   = 0.1;
+controls.panSpeed      = 0.02;
+controls.rotateSpeed   = 0.5;
+controls.zoomSpeed     = 1;
+controls.enableZoom    = false;
 
-const controls2       = new TrackballControls(camera, renderer.domElement);
-controls2.noRotate    = true;
-controls2.noPan       = true;
-controls2.noZoom      = false;
-controls2.zoomSpeed   = 1.5;
+const controls2     = new TrackballControls(camera, renderer.domElement);
+controls2.noRotate  = true;
+controls2.noPan     = true;
+controls2.noZoom    = false;
+controls2.zoomSpeed = 1.5;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Mesh
@@ -319,16 +319,17 @@ scene.add(light);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Post-Processing
+// Bloom runs first so glow stays contained within hex cells.
+// The HexaVision pass is the final output.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const composer   = new EffectComposer(renderer);
-const bloomPass  = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.3, 0.4, 0.0);
-const flyPass    = new ShaderPass(flyShader);
-flyPass.renderToScreen = true;
+const composer  = new EffectComposer(renderer);
+const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.3, 0.4, 0.0);
+const flyPass   = new ShaderPass(flyShader);
 
 composer.addPass(new RenderPass(scene, camera));
-composer.addPass(flyPass);
 composer.addPass(bloomPass);
+composer.addPass(flyPass);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Randomizer
@@ -422,8 +423,8 @@ window.addEventListener('resize', () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function animate(time) {
-  material.uniforms.uTime.value              = time * 0.001;
-  flyPass.material.uniforms.time.value       = time * 0.001;
+  material.uniforms.uTime.value        = time * 0.001;
+  flyPass.material.uniforms.time.value = time * 0.001;
 
   mesh.rotation.x += 0.0002;
   mesh.rotation.y += 0.001;
@@ -438,7 +439,7 @@ function animate(time) {
   requestAnimationFrame(animate);
 }
 
-animate();
+requestAnimationFrame(animate);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // UI — Scramble + Notification Banner
