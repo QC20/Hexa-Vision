@@ -17,7 +17,7 @@ An on-canvas double-click randomizes all shader parameters simultaneously, makin
 ### Live Example
 
 <div style="text-align: center; margin: 2rem 0;">
-  <img src="src/assets/screenshot.png" alt="HexaVision live rendering showing a glowing icosahedron sphere with animated Voronoi patterns fragmented through a hexagonal grid overlay" style="max-width: 650px; width: 100%; height: auto; border-radius: 8px;" />
+  <img src="src/assets/hexa-vision-desc-pic.png" alt="HexaVision live rendering showing a glowing icosahedron sphere with animated Voronoi patterns fragmented through a hexagonal grid overlay" style="max-width: 650px; width: 100%; height: auto; border-radius: 8px;" />
   <p style="margin-top: 1rem; font-size: 0.9em; color: #888;">The dynamic interplay of displacement mapping and the hexagonal compound-eye filter in real-time.</p>
 </div>
 
