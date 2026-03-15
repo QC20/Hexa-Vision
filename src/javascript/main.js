@@ -1,7 +1,11 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // Hexa Vision
+//
 // A real-time WebGL visualization simulating compound eye vision
 // through animated Voronoi patterns and hexagonal post-processing
+//
+// By JonaS Kjeldnmand Jensen
+//
 // March 2026
 // ─────────────────────────────────────────────────────────────────────────────
 
