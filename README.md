@@ -1,72 +1,82 @@
 # Hexa Vision
 
-A real-time WebGL visual experiment built with Three.js, combining procedural surface displacement driven by animated Voronoi noise with a post-processing pass that fragments the entire rendered scene through a hexagonal grid — simulating the compound eye of an insect looking out at a pulsing, organic form.
+A spiky, slowly morphing sphere seen through the eye of an insect. It runs in the browser with WebGL and three.js, on desktop, tablets and phones.
 
-The result sits somewhere between generative sculpture and perceptual illusion. The geometry breathes. The viewport fractures it into hundreds of tessellated cells. Everything is tunable at runtime.
+**[Open it here](https://qc20.github.io/Hexa-Vision/)**
 
----
+![Hexa Vision: a glowing green and blue spiked sphere broken up into thousands of tiny hexagonal cells](assets/preview.jpg)
 
-## What It Does
+The sphere's surface is pushed around by animated Voronoi noise. Then the whole frame is cut into a honeycomb of tiny lenses, roughly the way an insect's compound eye splits up what it sees. Bloom is applied before the honeycomb, so the glow stays inside each cell instead of smearing across the grid.
 
-An icosahedron subdivided to high resolution rotates at the center of the scene. Its surface is continuously displaced and coloured by a custom GLSL shader that computes animated Voronoi patterns directly on the GPU. Over the top of everything sits the HexaVision pass, a fullscreen ShaderPass that remaps UV coordinates into a hexagonal grid and masks out the space between cells — turning the rendered output into something that reads like vision through a compound eye.
+## Playing with it
 
-The pipeline goes: geometry shader rendering, then an UnrealBloomPass for luminance glow, then the HexaVision pass as the final composited output. The bloom happens beneath the hex grid, so light bleeds within each cell rather than across boundaries.
+Drag to spin it. A quick flick keeps it gliding for a while. Pinch or scroll to zoom. Tap the surface and a ripple runs across the sphere from that spot; double-tap for a new random look. While your finger is down, the cells underneath swell up like they're under a magnifying glass.
 
-An on-canvas double-click randomizes all shader parameters simultaneously, making the piece behave differently every few seconds without reloading.
+The hexagon button in the bottom-right corner opens the controls: palettes, sliders for the eye and the surface, and a few switches. Close the panel and the button fades out after a few seconds, so nothing sits on top of the picture. Touch the screen and it comes back.
 
-### Live Example
+Drift picks a new shape and palette every 12 seconds and melts into it slowly, which is nice if you just want to leave it running. Moving a slider turns it off again. Save exports the current frame as a PNG (on an iPad it opens the share sheet, so it can go straight into Photos). On phones and tablets you can also let the sphere lean as you tilt the device, and there's a switch that listens through the microphone: loudness swells the spikes and bass hits send out ripples.
 
-<div style="text-align: center; margin: 2rem 0;">
-  <img src="src/assets/hexa-vision-desc-pic.png" alt="HexaVision live rendering showing a glowing icosahedron sphere with animated Voronoi patterns fragmented through a hexagonal grid overlay" style="max-width: 650px; width: 100%; height: auto; border-radius: 8px;" />
-  <p style="margin-top: 1rem; font-size: 0.9em; color: #888;">The dynamic interplay of displacement mapping and the hexagonal compound-eye filter in real-time.</p>
-</div>
+With a keyboard: <kbd>Space</kbd> shuffles, <kbd>D</kbd> toggles drift, <kbd>S</kbd> saves, <kbd>F</kbd> goes fullscreen, <kbd>C</kbd> opens the controls and <kbd>H</kbd> hides everything.
 
----
+On an iPad, adding it to the home screen from Safari's share menu gets rid of the browser bars. It opens fullscreen from there.
 
-## The Math Worth Paying Attention To
+## How it works
 
-**Voronoi noise with temporal blending**
+### The surface
 
-Standard Voronoi gives you a static partition of space. Here, two independent Voronoi evaluations are computed per fragment — one at time `t` and one at `t + 1.0` — and smoothly interpolated using `fract(t)` as the blend factor. This creates a continuously morphing cellular pattern without any discontinuity at integer time boundaries. Each cell's seed point is additionally perturbed by a hash-based noise function before the distance computation, which means the cell boundaries themselves drift organically rather than oscillating predictably.
+The sphere is an icosahedron subdivided 30 times, about 58,000 vertices, drawn as a wireframe. The vertex shader moves every vertex out along its normal by an amount read from a Voronoi pattern.
 
-The distance metric used is `secondMinDist - minDist`, which gives the width of the boundary region between the two nearest seeds rather than the distance to a single nearest point. This is sometimes called F2 minus F1 Voronoi, and it produces the ridge-like outlines you see on the surface rather than filled polygonal regions.
+The pattern is F2 minus F1 Voronoi: for each point, the distance to the second-nearest seed minus the distance to the nearest one. That value is near zero along cell borders and grows toward the middle of a cell, and that's where the ridged, scaly outlines come from. Before any distances are measured, each seed gets nudged by value noise, so the borders wander instead of lining up in a neat grid. The Chaos slider sets how far they wander.
 
-**Triplanar projection**
+Animating it without popping takes a small trick. Whole numbers of time are treated as keyframes: the shader computes the pattern at `floor(t)` and at `floor(t) + 1` and blends the two with `fract(t)`. The end of one blend is exactly the start of the next, so the pattern never jumps. The Flow slider controls how fast `t` moves.
 
-Mapping a 2D noise function onto a sphere always produces distortion or seaming at the poles if you use standard UV coordinates. The vertex shader sidesteps this entirely by evaluating the Voronoi pattern three times — once per axis plane (XY, XZ, YZ) — and blending the results using the surface normal as a weight. Faces pointing along the X axis get mostly the YZ sample, and so on. The blending weights are normalized so they sum to 1.0 across any normal direction, which means the transition between projection axes is seamless regardless of where on the sphere you are.
+Wrapping a flat pattern around a sphere with ordinary UVs leaves seams and pinched poles. So the shader samples the pattern three times, once each on the XY, XZ and YZ planes, and blends them using the surface normal as weights. A face pointing along X mostly gets the YZ sample. The weights always add up to 1, which keeps the hand-over between projections invisible.
 
-**Hexagonal grid coordinates**
+Ripples live in four slots, each holding a direction on the sphere and a start time. For every vertex the shader works out the angle to each ripple's origin and lifts the surface where that angle matches a ring expanding at 1.4 radians per second. The ring closes up again on the far side of the sphere a bit over two seconds later.
 
-The HexaVision fragment shader converts screen-space UV coordinates into a hex grid by accounting for the offset rows that define a hexagonal tiling. Even rows sit flush, odd rows are shifted by half a cell width. After snapping each UV to its nearest hex center, a geometric mask is applied to cut away the inter-cell gaps. The mask computes the distance to the hex boundary analytically using the symmetry of a regular hexagon, avoiding any texture lookup or iterative sampling.
+### The eye
 
----
+The HexaVision pass runs last, on the finished frame. It lays two rectangular grids over the screen, offset from each other by half a cell, and each pixel takes whichever cell centre is closer. That gives a proper honeycomb with straight edges. The distance to the cell edge comes straight from the hexagon's symmetry, with no texture lookups, and it drives the gap between cells, a darker rim and a faint red and blue fringe near the edge of each lens.
 
-## Parameters and What They Change
+With Facets at 0, each cell shows one colour sampled at its centre. Turning it up makes every cell show its own small wide-angle view of the area around it, which is closer to what an insect actually gets.
 
-Everything is exposed in the dat.GUI panel, which opens from the top-right corner. The interesting levers are:
+The magnifier under your finger is a radial warp of the screen coordinates, applied before the honeycomb is built. Both the cells and the image inside them grow near the touch point.
 
-**Ommatidia Size** changes how large each hexagonal cell in the HexaVision pass appears. Small values push it toward a dense mosaic; large values let more of the underlying geometry read through each cell. At very high values the hexagonal structure mostly disappears, and at very low values the output becomes nearly abstract.
+### Keeping it smooth
 
-**Displacement Strength** controls how far the surface vertices are pushed outward along their normals by the Voronoi pattern. Negative values pull inward, which collapses parts of the geometry and creates a very different silhouette. Combined with a high Pattern Scale, negative displacement can make the surface look cracked or corroded rather than scaled.
+Controls never jump straight to a new value. Each one eases toward it, which is why shuffles and palette changes blend into each other. The pixel ratio is capped at 2, and the renderer keeps an eye on the frame rate: if it stays under 40 fps, the resolution drops a step at a time. The honeycomb hides most of the difference.
 
-**Noise Strength** perturbs the Voronoi seed points before distance computation. At 0.0 the cells are clean and regular. At 1.0 they become irregular and biological-looking. Anything in between sits on a spectrum from geometric to organic.
+If the scene can't start at all (no WebGL, or the CDN is unreachable), the page says so instead of sitting there blank.
 
-**Outline Width** shifts the threshold at which the F2-F1 pattern transitions from outline to fill. Low values produce thin wireframe-like ridges between cells. High values invert the visual weight, making the ridges thick and the cell interiors small.
+## Running it locally
 
-If you wanted to replace the Voronoi pattern entirely with a different noise function — Worley, Perlin, or a hand-authored texture — the `triplanar()` call in the vertex shader is where that swap would happen. Feeding in a hexagonal noise function here, for instance, would create resonance between the surface pattern and the screen-space hex grid, which would read very differently from the current offset between the two.
-
----
-
-## Running Locally
-
-This project has no build step and no npm dependencies. It imports Three.js and anime.js directly from Skypack CDN, and loads dat.GUI from a CDN script tag in the HTML. Open `index.html` in a browser that supports ES modules and WebGL 2 and it runs immediately. A local server is required (browsers block ES module imports from `file://` paths).
+There's no build step and nothing to install. three.js r128 is loaded from jsDelivr through the import map in `index.html`. Browsers refuse to load ES modules from `file://`, so serve the folder with any static server:
 
 ```bash
-# Python
-python -m http.server 8080
-
-# Node
-npx serve .
+git clone https://github.com/QC20/Hexa-Vision.git
+cd Hexa-Vision
+python3 -m http.server 8080
 ```
 
-Clone the repository with `git clone https://github.com/QC20/hexa-vision.git` and serve from the root.
+Then open http://localhost:8080.
+
+## Project layout
+
+```
+index.html           page, import map and the control panel markup
+site.webmanifest     home screen / fullscreen app settings
+src/js/main.js       scene, gestures, easing and the render loop
+src/js/shaders.js    surface shaders and the HexaVision pass
+src/js/ui.js         panel, intro, hints and keyboard shortcuts
+src/js/palettes.js   palettes and the random palette generator
+src/js/sensors.js    tilt and microphone input
+src/js/scramble.js   the text scramble in the intro
+src/css/style.css
+assets/              preview image and app icons
+```
+
+To try a different noise on the surface, swap out the `triplanar()` call in the vertex shader. A hexagonal noise there would line up with the honeycomb on screen, and I'd like to see what that does.
+
+## License
+
+MIT, see [LICENSE](LICENSE).

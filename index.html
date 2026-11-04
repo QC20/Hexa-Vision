@@ -1,39 +1,178 @@
+<!DOCTYPE html>
 <!--
   ┌─────────────────────────────────────────────────────────────────────────────┐
   │ Hexa Vision                                                                 │
   │ A real-time WebGL visualization simulating compound eye vision              │
   │ through animated Voronoi patterns and hexagonal post-processing             │
   │                                                                             │
-  │ By Jonas Kjeldnmand Jensen                                                  │
+  │ By Jonas Kjeldmand Jensen                                                   │
   │                                                                             │
   │ March 2026                                                                  │
   └─────────────────────────────────────────────────────────────────────────────┘
 -->
-<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>Hexa Vision</title>
-    <link rel="stylesheet" href="src/styles/style.css" />
+    <meta name="description" content="A pulsing Voronoi surface seen through the hexagonal lens of a compound eye. Real-time WebGL." />
 
-    <!-- dat.GUI loaded before the module so `dat` is available globally -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.9/dat.gui.min.js"></script>
+    <meta name="theme-color" content="#000000" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Hexa Vision" />
+
+    <meta property="og:title" content="Hexa Vision" />
+    <meta property="og:description" content="A pulsing Voronoi surface seen through the hexagonal lens of a compound eye." />
+    <meta property="og:image" content="https://qc20.github.io/Hexa-Vision/assets/preview.jpg" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2.5 28 9.25v13.5L16 29.5 4 22.75V9.25Z' fill='%23000' stroke='%2300ffb0' stroke-width='2.5'/%3E%3C/svg%3E" />
+    <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
+    <link rel="manifest" href="site.webmanifest" />
+
+    <!-- Black from the very first paint, so a slow network never flashes white. -->
+    <style>html, body { background: #000; }</style>
+    <link rel="stylesheet" href="src/css/style.css" />
   </head>
   <body>
+    <canvas id="scene" aria-label="Hexa Vision: an animated, spiky sphere seen through a honeycomb of tiny lenses"></canvas>
 
-    <div id="app">
-      <div class="note">three.js + HexaVision Pass</div>
-
-      <div id="notification">
-        <span>
-          Has this piqued your interest? Have a look at some of my other work
-          <a href="https://github.com/QC20?tab=repositories" target="_blank" rel="noopener">here</a>
-        </span>
-        <button id="closeBtn" aria-label="Close notification">&#x2715;</button>
-      </div>
+    <!-- ── Intro ─────────────────────────────────────────── -->
+    <div id="intro" class="intro" aria-hidden="true">
+      <svg class="intro__hex" viewBox="0 0 100 100">
+        <polygon points="50,4 90,27 90,73 50,96 10,73 10,27" pathLength="1" />
+      </svg>
+      <h1 class="intro__title">HEXA VISION</h1>
+      <p class="intro__sub">a compound eye, looking at something alive</p>
     </div>
 
-    <script type="module" src="src/javascript/main.js"></script>
+    <!-- ── Chrome ────────────────────────────────────────── -->
+    <div class="wordmark chrome" aria-hidden="true">Hexa Vision</div>
+
+    <button id="ui-toggle" class="fab chrome" type="button" aria-label="Controls" aria-expanded="false" aria-controls="panel">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 2.6 20.2 7.3v9.4L12 21.4l-8.2-4.7V7.3Z" />
+        <circle cx="12" cy="12" r="2.6" />
+      </svg>
+    </button>
+
+    <aside id="panel" class="panel" aria-label="Controls" aria-hidden="true">
+      <header class="panel__head">
+        <span class="panel__title">Hexa Vision</span>
+        <button class="icon-btn" type="button" data-action="hide" aria-label="Hide controls">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
+        </button>
+      </header>
+
+      <div class="actions">
+        <button class="action" type="button" data-action="shuffle">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h3.5c4 0 6 10 10 10H21M18 14l3 3-3 3M3 17h3.5c1.4 0 2.5-1.2 3.4-2.8M21 7h-4.5c-1.4 0-2.5 1.2-3.4 2.8M18 4l3 3-3 3" /></svg>
+          <span>Shuffle</span>
+        </button>
+        <button class="action" type="button" data-action="drift" aria-pressed="false">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12c2.5-4 5-4 7.5 0s5 4 7.5 0 3.5-3 5-1.5" /><path d="M2 17c2.5-4 5-4 7.5 0s5 4 7.5 0 3.5-3 5-1.5" opacity=".45" /></svg>
+          <span>Drift</span>
+        </button>
+        <button class="action" type="button" data-action="snapshot">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h2l1.5-2h6l1.5 2h2A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5Z" /><circle cx="12" cy="12.5" r="3.2" /></svg>
+          <span>Save</span>
+        </button>
+        <button class="action" type="button" data-action="fullscreen">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" /></svg>
+          <span>Full</span>
+        </button>
+      </div>
+
+      <section class="group">
+        <h2>Palette</h2>
+        <div id="swatches" class="swatches"></div>
+      </section>
+
+      <section class="group">
+        <h2>Eye</h2>
+        <label class="slider"><span>Cell size</span><output></output>
+          <input type="range" data-param="cellSize" min="2" max="40" step="0.5" /></label>
+        <label class="slider"><span>Facets</span><output></output>
+          <input type="range" data-param="facets" min="0" max="1" step="0.01" /></label>
+        <label class="slider"><span>Gap</span><output></output>
+          <input type="range" data-param="gap" min="0" max="0.3" step="0.01" /></label>
+      </section>
+
+      <section class="group">
+        <h2>Surface</h2>
+        <label class="slider"><span>Spikes</span><output></output>
+          <input type="range" data-param="displacement" min="-0.5" max="4" step="0.01" /></label>
+        <label class="slider"><span>Pattern</span><output></output>
+          <input type="range" data-param="scale" min="1" max="20" step="0.1" /></label>
+        <label class="slider"><span>Chaos</span><output></output>
+          <input type="range" data-param="noiseStrength" min="0" max="1.5" step="0.01" /></label>
+        <label class="slider"><span>Outline</span><output></output>
+          <input type="range" data-param="outline" min="0.01" max="1" step="0.01" /></label>
+        <label class="slider"><span>Flow</span><output></output>
+          <input type="range" data-param="flow" min="0" max="1" step="0.01" /></label>
+        <label class="slider"><span>Spin</span><output></output>
+          <input type="range" data-param="spin" min="0" max="5" step="0.1" /></label>
+        <label class="slider"><span>Glow</span><output></output>
+          <input type="range" data-param="glow" min="0" max="3" step="0.01" /></label>
+      </section>
+
+      <section class="group">
+        <label class="switch"><span>Compound eye</span><input type="checkbox" data-toggle="eye" /></label>
+        <label class="switch"><span>Wireframe</span><input type="checkbox" data-toggle="wireframe" /></label>
+        <label class="switch" data-feature="tilt"><span>Tilt to steer</span><input type="checkbox" data-toggle="tilt" /></label>
+        <label class="switch" data-feature="mic"><span>Listen to sound</span><input type="checkbox" data-toggle="mic" /></label>
+      </section>
+
+      <footer class="panel__foot">
+        <p>Drag to spin, pinch or scroll to zoom. Tap the surface to send a ripple, double-tap to shuffle.</p>
+        <p class="keys"><kbd>Space</kbd> shuffle <kbd>D</kbd> drift <kbd>H</kbd> hide all <kbd>C</kbd> controls</p>
+        <p>More experiments on <a href="https://github.com/QC20?tab=repositories" target="_blank" rel="noopener">GitHub</a>.</p>
+      </footer>
+    </aside>
+
+    <div id="hint" class="hint" aria-live="polite"></div>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <div id="notification" class="notification">
+      <span>
+        Has this piqued your interest? Have a look at some of my other work
+        <a href="https://github.com/QC20?tab=repositories" target="_blank" rel="noopener">here</a>
+      </span>
+      <button id="closeBtn" type="button" aria-label="Close notification">&#x2715;</button>
+    </div>
+
+    <!-- ── Fallback ──────────────────────────────────────── -->
+    <div id="fallback" class="fallback" role="alert">
+      <p class="fallback__title">Hexa Vision couldn't start</p>
+      <p>It needs WebGL and a reasonably recent browser. Try reloading, or open it in an up-to-date Safari, Chrome, Edge or Firefox.</p>
+    </div>
+
+    <script nomodule>document.documentElement.className += ' has-failed';</script>
+    <script>
+      // If the scene hasn't started after a while (CDN down, no WebGL, script error),
+      // show a message instead of leaving the screen blank.
+      setTimeout(function () {
+        if (!window.__hexaVisionReady) document.documentElement.classList.add('has-failed');
+      }, 12000);
+    </script>
+    <!--
+      The three.js example modules import the bare name "three", which only
+      resolves through an import map. The shim covers browsers without native
+      import maps (Safari before 16.4) and does nothing everywhere else.
+    -->
+    <script async src="https://cdn.jsdelivr.net/npm/es-module-shims@1.10.0/dist/es-module-shims.js"></script>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.module.js",
+          "three/examples/jsm/": "https://cdn.jsdelivr.net/npm/three@0.128.0/examples/jsm/"
+        }
+      }
+    </script>
+    <script type="module" src="src/js/main.js"></script>
   </body>
 </html>
